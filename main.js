@@ -3,7 +3,8 @@
 const http = require('node:http');
 const path = require('node:path');
 const fs = require('node:fs/promises');
-const Handlebars = require("handlebars");
+const Handlebars = require('handlebars');
+const { marked } = require('marked');
 
 http.createServer((req, res) => {
   const { method, url } = req;
@@ -16,6 +17,8 @@ http.createServer((req, res) => {
     postsList(res);
   }
   else if (method === 'GET' && url.split('/')[1] === 'posts') {
+    const postID = url.split('/')[2];
+    postFormat(postID, res);
   }
   else {
     const headers = {
@@ -30,9 +33,9 @@ http.createServer((req, res) => {
 
 async function postsList(res) {
   try {
-    let data = await fs.readFile('./index.html', 'utf8');
+    const data = await fs.readFile('templates/index.html', 'utf8');
     const template = Handlebars.compile(data);
-    let posts = await fs.readdir('./postsData', 'utf8');
+    const posts = await fs.readdir('./postsData', 'utf8');
     console.log(posts);
 
     let REALData = { posts : [ ] };
@@ -43,6 +46,23 @@ async function postsList(res) {
     }
     console.log(REALData.posts);
     res.end(template(REALData));
+  }
+  catch (err) {
+    res.end(`<h1>some error ${err}</h1>`);
+  }
+}
+
+async function postFormat(postID, res) {
+  try {
+    const data = await fs.readFile('templates/post.html', 'utf8');
+    const template = Handlebars.compile(data);
+
+    const postFilePath = path.join(__dirname, './postsData', postID + '.json');
+    const postFile = await fs.readFile(postFilePath, 'utf8');
+    const postContents = JSON.parse(postFile);
+    //parse markdown string to HTML content
+    postContents.contents = marked.parse(postContents.contents);
+    res.end(template(postContents));
   }
   catch (err) {
     res.end(`<h1>some error ${err}</h1>`);
