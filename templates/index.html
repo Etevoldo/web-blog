@@ -7,7 +7,9 @@
 <body>
   <ul>
     {{#each posts}}
-      <li>{{this.title}}</li>
+      <li>
+      <a href="/posts/{{this.title}}">{{this.title}}</a>
+      </li>
     {{/each}}
   </ul>
 <body>

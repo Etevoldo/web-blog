@@ -15,6 +15,8 @@ http.createServer((req, res) => {
     res.writeHead(200, headers);
     postsList(res);
   }
+  else if (method === 'GET' && url.split('/')[1] === 'posts') {
+  }
   else {
     const headers = {
       'Content-Type':'text/html'
