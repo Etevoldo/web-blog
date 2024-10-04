@@ -16,6 +16,7 @@ http.createServer((req, res) => {
     res.writeHead(200, headers);
     postsList(res);
   }
+  // render specific post on the request /posts/number
   else if (method === 'GET' && url.split('/')[1] === 'posts') {
     const postID = url.split('/')[2];
     postFormat(postID, res);
