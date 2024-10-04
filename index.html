@@ -5,11 +5,12 @@
   <title>Consulta</title>
 </head>
 <body>
-  <form action="http://localhost:8080" method="POST">
-    <input type="text" name="title" placeholder="Article Title">
-    <textarea name="content" placeholder="Article Content"></textarea>
-    <input type="submit">Submit</button>
-  </form>
+  <ul>
+    {{#each posts}}
+      <li>{{this.title}}</li>
+    {{/each}}
+  </ul>
+  <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
   <script type="text/javascript">
   </script>
 <body>
