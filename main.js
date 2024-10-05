@@ -8,7 +8,6 @@ const { marked } = require('marked');
 
 http.createServer((req, res) => {
   const { method, url } = req;
-
   if (method === 'GET' && url === '/') {
     const headers = {
       'Content-Type':'text/html'
@@ -20,6 +19,11 @@ http.createServer((req, res) => {
   else if (method === 'GET' && url.split('/')[1] === 'posts') {
     const postID = url.split('/')[2];
     postFormat(postID, res);
+  }
+  else if (url === '/home.css') {
+    res.writeHead(200, {'Content-Type':'text/css'});
+    fs.readFile('./styles/home.css')
+      .then((data) => res.end(data));
   }
   else {
     const headers = {
@@ -37,7 +41,6 @@ async function postsList(res) {
     const data = await fs.readFile('templates/index.html', 'utf8');
     const template = Handlebars.compile(data);
     const posts = await fs.readdir('./postsData', 'utf8');
-    console.log(posts);
 
     let REALData = { posts : [ ] };
     for (const postFileName of posts) {
@@ -45,7 +48,6 @@ async function postsList(res) {
       const postContent = await fs.readFile(postFilePath , 'utf8' );
       REALData.posts.push(JSON.parse(postContent));
     }
-    console.log(REALData.posts);
     res.end(template(REALData));
   }
   catch (err) {
