@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html land="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Consulta</title>
+  <link rel="stylesheet" type="text/css" href="../home.css"/>
+</head>
+<body>
+  <ul>
+    {{#each posts}}
+      <li>
+      <a href="/posts/{{this.id}}">{{this.title}}</a>
+      </li>
+    {{/each}}
+  </ul>
+<body>
+</html>
