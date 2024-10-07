@@ -20,10 +20,21 @@ http.createServer((req, res) => {
   // render specific post on the request /posts/number
   else if (method === 'GET' && url.split('/')[1] === 'posts') {
     const postID = url.split('/')[2];
+    const headers = {
+      'Content-Type':'text/html'
+    }
+
     postFormat(postID)
-      .then((data) => res.end(data));
+      .then((data) => {
+        res.writeHead(200, headers);
+        res.end(data);
+      })
+      .catch((errorPage) =>{
+        res.writeHead(404, headers);
+        res.end(errorPage);
+      });
   } // css files requests
-  else if (url === '/home.css') {
+  else if (method === 'GET' && url === '/home.css') {
     res.writeHead(200, {'Content-Type':'text/css'});
     fs.readFile('./styles/home.css')
       .then((data) => res.end(data));
@@ -56,7 +67,6 @@ async function postsList() {
     return finishedDocument;
   }
   catch (err) {
-    //res.end(`<h1>some error ${err}</h1>`);
     return `<h1>some error ${err}</h1>`;
   }
 }
@@ -77,6 +87,7 @@ async function postFormat(postID) {
     return finishedDocument;
   }
   catch (err) {
-    res.end(`<h1>some error ${err}</h1>`);
+    // assuming the only thing that can go wrong is reading unexistent files
+    return `<h1>404</h1><p>${err}</p>`;
   }
 }
