@@ -38,7 +38,26 @@ http.createServer((req, res) => {
     res.writeHead(200, {'Content-Type':'text/css'});
     fs.readFile('./styles/home.css')
       .then((data) => res.end(data));
-  } // mock response for random url
+  }
+  else if (method === 'GET' && url === '/admin' && req.headers['authorization']) {
+    // get authorization credendial (second word of authorization value)
+    const credentials = req.headers['authorization'].split(' ')[1];
+    // YWxhZGRpbjpvcGVuc2VzYW1l is aladdin:opensesame, just for testing
+    if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
+      res.writeHead(401);
+      res.end('access denied!\nWrong credentials!');
+    }
+    res.writeHead(200);
+    postsList(true)
+      .then((data) => res.end(data));
+  }
+  else if (method === 'GET' && url === '/admin') {
+    const headers = {
+      'WWW-Authenticate': 'Basic'
+    }
+    res.writeHead(401, headers);
+    res.end('Admin only');
+  }
   else {
     const headers = {
       'Content-Type':'text/html'
@@ -50,9 +69,15 @@ http.createServer((req, res) => {
 }).listen(8080);
 
 
-async function postsList() {
+async function postsList(isAdmin=false) {
+  let templatePath;
+  if (isAdmin)
+    templatePath = 'templates/indexAdmin.html';
+  else
+    templatePath = 'templates/index.html';
+
   try {
-    const data = await fs.readFile('templates/index.html', 'utf8');
+    const data = await fs.readFile(templatePath, 'utf8');
     const template = Handlebars.compile(data);
     const posts = await fs.readdir('./postsData', 'utf8');
 

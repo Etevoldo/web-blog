@@ -6,10 +6,16 @@
   <link rel="stylesheet" type="text/css" href="../home.css"/>
 </head>
 <body>
+  <header>
+    <h1>Voldo's blog</h1>
+    <a href="/new">+Add</a>
+  </header>
   <ul>
     {{#each posts}}
       <li>
       <a href="/posts/{{this.id}}">{{this.title}}</a>
+      <a href="/edit/{{this.id}}">edit</a>
+      <a href="/delete/{{this.id}}">delete</a>
       </li>
     {{/each}}
   </ul>
