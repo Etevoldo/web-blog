@@ -8,23 +8,26 @@ const { marked } = require('marked');
 
 http.createServer((req, res) => {
   const { method, url } = req;
+  // list all posts
   if (method === 'GET' && url === '/') {
     const headers = {
       'Content-Type':'text/html'
     }
     res.writeHead(200, headers);
-    postsList(res);
+    postsList()
+      .then((data) => res.end(data));
   }
   // render specific post on the request /posts/number
   else if (method === 'GET' && url.split('/')[1] === 'posts') {
     const postID = url.split('/')[2];
-    postFormat(postID, res);
-  }
+    postFormat(postID)
+      .then((data) => res.end(data));
+  } // css files requests
   else if (url === '/home.css') {
     res.writeHead(200, {'Content-Type':'text/css'});
     fs.readFile('./styles/home.css')
       .then((data) => res.end(data));
-  }
+  } // mock response for random url
   else {
     const headers = {
       'Content-Type':'text/html'
@@ -36,7 +39,7 @@ http.createServer((req, res) => {
 }).listen(8080);
 
 
-async function postsList(res) {
+async function postsList() {
   try {
     const data = await fs.readFile('templates/index.html', 'utf8');
     const template = Handlebars.compile(data);
@@ -48,24 +51,30 @@ async function postsList(res) {
       const postContent = await fs.readFile(postFilePath , 'utf8' );
       REALData.posts.push(JSON.parse(postContent));
     }
-    res.end(template(REALData));
+    //parse handlebars expressions to finished document
+    const finishedDocument = template(REALData);
+    return finishedDocument;
   }
   catch (err) {
-    res.end(`<h1>some error ${err}</h1>`);
+    //res.end(`<h1>some error ${err}</h1>`);
+    return `<h1>some error ${err}</h1>`;
   }
 }
 
-async function postFormat(postID, res) {
+async function postFormat(postID) {
   try {
     const data = await fs.readFile('templates/post.html', 'utf8');
     const template = Handlebars.compile(data);
-
     const postFilePath = path.join(__dirname, './postsData', postID + '.json');
     const postFile = await fs.readFile(postFilePath, 'utf8');
     const postContents = JSON.parse(postFile);
+
     //parse markdown string to HTML content
     postContents.contents = marked.parse(postContents.contents);
-    res.end(template(postContents));
+    //parse handlebars expressions to finished document
+    const finishedDocument = template(postContents);
+
+    return finishedDocument;
   }
   catch (err) {
     res.end(`<h1>some error ${err}</h1>`);
