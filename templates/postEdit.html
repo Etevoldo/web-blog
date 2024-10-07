@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html land="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MyBlog {{title}}</title>
+  <link rel="stylesheet" type="text/css" href="../home.css"/>
+</head>
+<body>
+  <header>
+    <a href="../../">&lt-- Go back home</a>
+  </header>
+  <form>
+    <input type="text" id="title" name="title" value="{{title}}"></input>
+    <textarea id="contents" name="contents" rows="40" cols="60">{{{contents}}}</textarea>
+    <input type="submit" id="send" value="Edit"></input>
+  </form>
+  <script>
+    const btn = document.getElementById('send');
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
+      const obj = {
+        title:document.getElementById('title').value,
+        contents: document.getElementById('contents').value
+      };
+      console.log(obj);
+      //TODO fetch() a post request with this obj
+    });
+  </script>
+<body>
+</html>

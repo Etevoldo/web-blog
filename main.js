@@ -39,7 +39,9 @@ http.createServer((req, res) => {
     fs.readFile('./styles/home.css')
       .then((data) => res.end(data));
   }
-  else if (method === 'GET' && url === '/admin' && req.headers['authorization']) {
+  else if (method === 'GET'
+           && url === '/admin'
+           && req.headers['authorization']) {
     // get authorization credendial (second word of authorization value)
     const credentials = req.headers['authorization'].split(' ')[1];
     // YWxhZGRpbjpvcGVuc2VzYW1l is aladdin:opensesame, just for testing
@@ -49,6 +51,19 @@ http.createServer((req, res) => {
     }
     res.writeHead(200);
     postsList(true)
+      .then((data) => res.end(data));
+  }
+  else if (method === 'GET'
+           && url.split('/')[1] === 'edit'
+           && req.headers['authorization']) {
+    // get authorization credendial (second word of authorization value)
+    const credentials = req.headers['authorization'].split(' ')[1];
+    // YWxhZGRpbjpvcGVuc2VzYW1l is aladdin:opensesame, just for testing
+    if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
+      res.writeHead(401);
+      res.end('access denied!\nWrong credentials!');
+    }
+    editFormat(url.split('/')[2])
       .then((data) => res.end(data));
   }
   else if (method === 'GET' && url === '/admin') {
@@ -62,8 +77,16 @@ http.createServer((req, res) => {
     const headers = {
       'Content-Type':'text/html'
     }
-    res.writeHead(200, headers);
-    res.end(`<h1>you sent something else: ${url}</h1>`);
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk;
+    });
+    req.on('end', () => {
+      res.writeHead(200, headers);
+      // debug info
+      res.end(`<h1>you sent something else: ${url}</h1><p>
+      Method: ${method}body: ${decodeURIComponent(body)}</p>`);
+    });
   }
 
 }).listen(8080);
@@ -106,6 +129,25 @@ async function postFormat(postID) {
 
     //parse markdown string to HTML content
     postContents.contents = marked.parse(postContents.contents);
+    //parse handlebars expressions to finished document
+    const finishedDocument = template(postContents);
+
+    return finishedDocument;
+  }
+  catch (err) {
+    // assuming the only thing that can go wrong is reading unexistent files
+    return `<h1>404</h1><p>${err}</p>`;
+  }
+}
+
+async function editFormat(postID) {
+  try {
+    const data = await fs.readFile('templates/postEdit.html', 'utf8');
+    const template = Handlebars.compile(data);
+    const postFilePath = path.join(__dirname, './postsData', postID + '.json');
+    const postFile = await fs.readFile(postFilePath, 'utf8');
+    const postContents = JSON.parse(postFile);
+
     //parse handlebars expressions to finished document
     const finishedDocument = template(postContents);
 
