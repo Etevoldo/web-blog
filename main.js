@@ -76,7 +76,7 @@ http.createServer((req, res) => {
   }
   else {
     const headers = {
-      'Content-Type':'text/html'
+      'Content-Type':'text/plain'
     }
     let body = '';
     req.on('data', chunk => {
@@ -85,8 +85,8 @@ http.createServer((req, res) => {
     req.on('end', () => {
       res.writeHead(200, headers);
       // debug info
-      res.end(`<h1>you sent something else: ${url}</h1><p>
-      Method: ${method}body: ${decodeURIComponent(body)}</p>`);
+      res.end(`you sent something else: ${url}
+      Method: ${method}\nbody: ${body}`);
     });
   }
 

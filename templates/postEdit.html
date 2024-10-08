@@ -16,14 +16,31 @@
   </form>
   <script>
     const btn = document.getElementById('send');
-    btn.addEventListener("click", (event) => {
+    const url = window.location.href;
+
+    btn.addEventListener('click', (event) => {
       event.preventDefault();
+
       const obj = {
-        title:document.getElementById('title').value,
+        id: parseInt(url.split('/').at(-1)), //last element is post id
+        title: document.getElementById('title').value,
         contents: document.getElementById('contents').value
       };
-      console.log(obj);
-      //TODO fetch() a post request with this obj
+
+      console.log(obj); // debug
+      const editHeaders = new Headers();
+      editHeaders.append('Content-Type', 'application/json');
+      // append credentials header later (!)
+
+      const options = {
+        method: 'PUT',
+        body: JSON.stringify(obj),
+        headers: editHeaders
+      }
+      fetch(url, options)
+        .then(res  => res.text())
+        .then(data => console.log(data))
+        .catch(err => console.log(err));
     });
   </script>
 <body>
