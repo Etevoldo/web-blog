@@ -39,9 +39,14 @@
       }
       fetch(url, options)
         .then(res  => res.text())
-        .then(data => console.log(data))
+        .then(data => showSucess(data))
         .catch(err => console.log(err));
     });
+
+    function showSucess(data) {
+      alert(data);
+      window.history.back();
+    }
   </script>
 <body>
 </html>

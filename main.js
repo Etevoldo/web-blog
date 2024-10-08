@@ -3,6 +3,7 @@
 const http = require('node:http');
 const path = require('node:path');
 const fs = require('node:fs/promises');
+const { createWriteStream } = require('node:fs');
 const Handlebars = require('handlebars');
 const { marked } = require('marked');
 
@@ -16,8 +17,7 @@ http.createServer((req, res) => {
     res.writeHead(200, headers);
     postsList()
       .then((data) => res.end(data));
-  }
-  // render specific post on the request /posts/number
+  } // render specific post on the request /posts/number
   else if (method === 'GET' && url.split('/')[1] === 'posts') {
     const postID = url.split('/')[2];
     const headers = {
@@ -53,7 +53,7 @@ http.createServer((req, res) => {
     res.writeHead(200);
     postsList(true)
       .then((data) => res.end(data));
-  }
+  } // update post page
   else if (method === 'GET'
            && url.split('/')[1] === 'edit'
            && req.headers['authorization']) {
@@ -63,7 +63,9 @@ http.createServer((req, res) => {
     if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
       res.writeHead(401);
       res.end('access denied!\nWrong credentials!');
+      return;
     }
+    res.writeHead(200);
     editFormat(url.split('/')[2])
       .then((data) => res.end(data));
   }
@@ -73,6 +75,26 @@ http.createServer((req, res) => {
     }
     res.writeHead(401, headers);
     res.end('Admin only');
+  } // Update post
+  else if (method === 'PUT'
+           && url.split('/')[1] === 'edit'
+           && req.headers['authorization']) {
+    const credentials = req.headers['authorization'].split(' ')[1];
+    if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
+      res.writeHead(401);
+      res.end('access denied!\nWrong credentials!');
+    }
+    const headers = {'Content-Type':'text/plain'};
+    res.writeHead(200, headers);
+
+    const postID = url.split('/')[2];
+    const postFilePath = path.join(__dirname, './postsData', postID + '.json');
+    const postToUpdate = createWriteStream(postFilePath);
+    req.pipe(postToUpdate);
+    req.on('end', () => {
+      console.log(`updated ${postFilePath}`); // debug
+      res.end(`updated ${postFilePath}`);
+    });
   }
   else {
     const headers = {
@@ -160,4 +182,7 @@ async function editFormat(postID) {
     // assuming the only thing that can go wrong is reading unexistent files
     return `<h1>404</h1><p>${err}</p>`;
   }
+}
+
+async function updatePost(postID, req) {
 }
