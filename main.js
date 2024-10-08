@@ -120,6 +120,8 @@ async function postsList(isAdmin=false) {
   }
 }
 
+console.log(`Server running at http://localhost:8080`);
+
 async function postFormat(postID) {
   try {
     const data = await fs.readFile('templates/post.html', 'utf8');
