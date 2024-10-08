@@ -48,6 +48,7 @@ http.createServer((req, res) => {
     if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
       res.writeHead(401);
       res.end('access denied!\nWrong credentials!');
+      return;
     }
     res.writeHead(200);
     postsList(true)
