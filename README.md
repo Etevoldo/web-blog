@@ -4,7 +4,7 @@ a [roadmap.sh project](https://roadmap.sh/projects/personal-blog) of a (mostly) 
 
 It is full of unsafe code like unsanitized marker parses and basic HTTP authentication on a http connection (with the password right on the code) so don't run this outside your local machine!
 
-**currently incomplete**: building the edit and delete and new functionality
+**currently incomplete**: building delete and new functionality
 
 ---
 
@@ -12,11 +12,11 @@ It is full of unsafe code like unsanitized marker parses and basic HTTP authenti
 1. clone the repo
 2. download the dependencies
 ```console
-npm i handlebars marked
+npm i
 ```
 3. run the main.js file to open the server
 ```console
-node main.js
+npm start
 ```
 4. explore in http://localhost:8080
 
