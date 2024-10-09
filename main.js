@@ -96,6 +96,27 @@ http.createServer((req, res) => {
       res.end(`updated ${postFilePath}`);
     });
   }
+  else if (method === 'DELETE'
+           && url.split('/')[1] === 'edit'
+           && req.headers['authorization']) {
+    const credentials = req.headers['authorization'].split(' ')[1];
+    if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
+      res.writeHead(401);
+      res.end('access denied!\nWrong credentials!');
+    }
+    const headers = {'Content-Type':'text/plain'};
+    res.writeHead(200, headers);
+
+    const postID = url.split('/')[2];
+    const postFilePath = path.join(__dirname, './postsData', postID + '.json');
+    fs.unlink(postFilePath)
+      .then(err => {
+        if (err)
+          res.end(`error deleting ${postFilePath}`);
+        else
+          res.end(`deleted ${postFilePath}`);
+      });
+  }
   else {
     const headers = {
       'Content-Type':'text/plain'

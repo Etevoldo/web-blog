@@ -12,17 +12,19 @@
   <form>
     <input type="text" id="title" name="title" value="{{title}}"></input>
     <textarea id="contents" name="contents" rows="40" cols="60">{{{contents}}}</textarea>
-    <input type="submit" id="send" value="Edit"></input>
+    <input type="submit" id="edit" value="Edit"></input>
   </form>
+    <button type="submit" id="delete" value="Delete">Delete</button>
   <script>
-    const btn = document.getElementById('send');
+    const btnEdit = document.getElementById('edit');
     const url = window.location.href;
+    const id = parseInt(url.split('/').at(-1)); //last element is post id
 
-    btn.addEventListener('click', (event) => {
+    btnEdit.addEventListener('click', (event) => {
       event.preventDefault();
 
       const obj = {
-        id: parseInt(url.split('/').at(-1)), //last element is post id
+        id: id,
         title: document.getElementById('title').value,
         contents: document.getElementById('contents').value
       };
@@ -43,6 +45,20 @@
         .catch(err => console.log(err));
     });
 
+    const btnDelete = document.getElementById('delete');
+    const confirmationText = "Are you sure? click again if YES";
+
+    btnDelete.addEventListener('click', (event) => {
+      if (!(btnDelete.textContent === confirmationText)) {
+        btnDelete.textContent = confirmationText;
+        return;
+      }
+
+      fetch(url, { method: "DELETE" })
+        .then(res  => res.text())
+        .then(data => showSucess(data))
+        .catch(err => console.log(err));
+    });
     function showSucess(data) {
       alert(data);
       window.history.back();
