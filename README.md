@@ -4,8 +4,6 @@ a [roadmap.sh project](https://roadmap.sh/projects/personal-blog) of a (mostly) 
 
 It is full of unsafe code like unsanitized marker parses and basic HTTP authentication on a http connection (with the password right on the code) so don't run this outside your local machine!
 
-**currently incomplete**: building delete and new functionality
-
 ---
 
 # How run
@@ -19,4 +17,6 @@ npm i
 npm start
 ```
 4. explore in http://localhost:8080
+
+append `/admin` to the url to edit posts and all
 

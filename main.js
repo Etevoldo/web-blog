@@ -3,7 +3,7 @@
 const http = require('node:http');
 const path = require('node:path');
 const fs = require('node:fs/promises');
-const { createWriteStream } = require('node:fs');
+const { createWriteStream, createReadStream } = require('node:fs');
 const Handlebars = require('handlebars');
 const { marked } = require('marked');
 
@@ -65,9 +65,36 @@ http.createServer((req, res) => {
       res.end('access denied!\nWrong credentials!');
       return;
     }
-    res.writeHead(200);
+    const headers = {
+      'Content-Type':'text/html'
+    }
+
+    res.writeHead(200, headers);
     editFormat(url.split('/')[2])
       .then((data) => res.end(data));
+  } // new post page, slight variation of update post page
+  else if (method === 'GET'
+           && url.split('/')[1] === 'new'
+           && req.headers['authorization']) {
+    // get authorization credendial (second word of authorization value)
+    const credentials = req.headers['authorization'].split(' ')[1];
+    // YWxhZGRpbjpvcGVuc2VzYW1l is aladdin:opensesame, just for testing
+    if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
+      res.writeHead(401);
+      res.end('access denied!\nWrong credentials!');
+      return;
+    }
+    const headers = {
+      'Content-Type':'text/html'
+    }
+    const newPostPath = path.join(__dirname, '/templates/postNew.html');
+    const newPostDocument = createReadStream(newPostPath);
+    res.writeHead(200, headers);
+
+    newPostDocument.pipe(res)
+    newPostDocument.on('end', () => {
+      res.end();
+    });
   }
   else if (method === 'GET' && url === '/admin') {
     const headers = {
@@ -116,6 +143,32 @@ http.createServer((req, res) => {
         else
           res.end(`deleted ${postFilePath}`);
       });
+  }
+  else if (method === 'POST'
+           && url.split('/')[1] === 'new'
+           && req.headers['authorization']) {
+    const credentials = req.headers['authorization'].split(' ')[1];
+    if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
+      res.writeHead(401);
+      res.end('access denied!\nWrong credentials!');
+    }
+
+    let body = ''; // get body data
+    req.on('data', chunk => {
+      body += chunk;
+    });
+    req.on('end', () => {
+      newPost(body)
+        .then(result => {
+          res.writeHead(201, {'Content-Type':'text/plain'});
+          res.end(result)
+        })
+        .catch(err => {
+          res.writeHead(500, {'Content-Type':'text/plain'});
+          res.end(result)
+        })
+    });
+
   }
   else {
     const headers = {
@@ -205,5 +258,12 @@ async function editFormat(postID) {
   }
 }
 
-async function updatePost(postID, req) {
+async function newPost(body) {
+  const postsQuantity = (await fs.readdir('./postsData', 'utf8')).length + 1;
+  const postFilePath = './postsData/' + postsQuantity + '.json';
+
+  const newPostObj = JSON.parse(body);
+  newPostObj.id = postsQuantity;
+  await fs.writeFile(postFilePath, JSON.stringify(newPostObj));
+  return `New post written on ${postFilePath}`;
 }

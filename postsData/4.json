@@ -1,5 +1,1 @@
-{
-  "id": 4,
-  "title": "good1!!!",
-  "contents": "# BNANG"
-}
+{"title":"git","contents":"# What is it\nVersion control is to record changes to files, normally for coding [[Source Code|source]] files, but can be applied for anything else.\nGit is as [[DVCS]] (Distributed Version Control System). Everybody mirrors the files on the repo, to a full extent, this is, including the whole history of all changes on everybodies computers.\n\nIt also allow [[Hierarchical models]].","id":4}

@@ -12,3 +12,10 @@ a {
 img {
   max-width: 25em;
 }
+
+code {
+  display: inline-block;
+  border: 1px solid white;
+  background: #0f0b0d;
+  padding: 0.1em;
+}
