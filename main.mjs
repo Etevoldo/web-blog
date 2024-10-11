@@ -1,11 +1,13 @@
 'use strict';
 
-import { http } from 'node:http';
-const path = require('node:path');
-const fs = require('node:fs/promises');
-const { createWriteStream, createReadStream } = require('node:fs');
-const Handlebars = require('handlebars');
-const { marked } = require('marked');
+import http from 'node:http';
+import path from 'node:path';
+import fs from 'node:fs/promises';
+import { createWriteStream, createReadStream } from 'node:fs';
+import Handlebars from 'handlebars';
+import { marked } from 'marked';
+
+const __dirname = path.resolve(path.dirname(''));
 
 http.createServer((req, res) => {
   const { method, url } = req;
