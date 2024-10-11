@@ -1,6 +1,6 @@
 'use strict';
 
-const http = require('node:http');
+import { http } from 'node:http';
 const path = require('node:path');
 const fs = require('node:fs/promises');
 const { createWriteStream, createReadStream } = require('node:fs');
