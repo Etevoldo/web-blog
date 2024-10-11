@@ -1,5 +1,1 @@
-{
-  "id": 1,
-  "title": "good job",
-  "contents": "# Marked in Node.js\n\nRendered by **marked**."
-}
+{"id":1,"title":"First post!","contents":"Marked in Node.js\n\n*Rendered* by **marked**, you can check [clicking here](https://marked.js.org/)."}

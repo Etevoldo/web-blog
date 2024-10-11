@@ -4,8 +4,10 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node main.js",
-    "dev": "npx nodemon main.mjs"
+    "build": "tsc src/main.ts",
+    "start": "node src/main.js",
+    "serve": "npm run build && npm run start",
+    "dev": "npx nodemon src/main.ts"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +18,8 @@
     "marked": "^14.1.2"
   },
   "devDependencies": {
-    "nodemon": "^3.1.7"
+    "@types/node": "^22.7.5",
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2"
   }
 }
