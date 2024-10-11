@@ -71,8 +71,9 @@ http.createServer(function (req, res) {
     } // css files requests
     else if (method === 'GET' && url === '/home.css') {
         res.writeHead(200, { 'Content-Type': 'text/css' });
-        fs.readFile('./styles/home.css')
-            .then(function (data) { return res.end(data); });
+        var css = (0, node_fs_1.createReadStream)(path.join(__dirname, '../styles/home.css'));
+        css.pipe(res);
+        css.on('end', function () { return res.end(); });
     }
     else if (method === 'GET'
         && url === '/admin'
@@ -119,7 +120,7 @@ http.createServer(function (req, res) {
         var headers = {
             'Content-Type': 'text/html'
         };
-        var newPostPath = path.join(__dirname, '/templates/postNew.html');
+        var newPostPath = path.join(__dirname, '../templates/postNew.html');
         var newPostDocument = (0, node_fs_1.createReadStream)(newPostPath);
         res.writeHead(200, headers);
         newPostDocument.pipe(res);
@@ -145,12 +146,12 @@ http.createServer(function (req, res) {
         var headers = { 'Content-Type': 'text/plain' };
         res.writeHead(200, headers);
         var postID = url === null || url === void 0 ? void 0 : url.split('/')[2];
-        var postFilePath_1 = path.join(__dirname, './postsData', postID + '.json');
-        var postToUpdate = (0, node_fs_1.createWriteStream)(postFilePath_1);
+        var postPath_1 = path.join(__dirname, '../postsData', postID + '.json');
+        var postToUpdate = (0, node_fs_1.createWriteStream)(postPath_1);
         req.pipe(postToUpdate);
         req.on('end', function () {
-            console.log("updated ".concat(postFilePath_1)); // debug
-            res.end("updated ".concat(postFilePath_1));
+            console.log("updated ".concat(postPath_1)); // debug
+            res.end("updated ".concat(postPath_1));
         });
     }
     else if (method === 'DELETE'
@@ -164,10 +165,10 @@ http.createServer(function (req, res) {
         var headers = { 'Content-Type': 'text/plain' };
         res.writeHead(200, headers);
         var postID = url === null || url === void 0 ? void 0 : url.split('/')[2];
-        var postFilePath_2 = path.join(__dirname, './postsData', postID + '.json');
-        fs.unlink(postFilePath_2)
-            .then(function () { return res.end("deleted ".concat(postFilePath_2)); })
-            .catch(function (err) { return res.end("Error deleting ".concat(postFilePath_2, ":\n").concat(err)); });
+        var postPath_2 = path.join(__dirname, '../postsData', postID + '.json');
+        fs.unlink(postPath_2)
+            .then(function () { return res.end("deleted ".concat(postPath_2)); })
+            .catch(function (err) { return res.end("Error deleting ".concat(postPath_2, ":\n").concat(err)); });
     }
     else if (method === 'POST'
         && (url === null || url === void 0 ? void 0 : url.split('/')[1]) === 'new'
@@ -295,7 +296,7 @@ function editFormat(postID) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 3, , 4]);
-                    postTemplatePath = path.join(templatesPath, 'post.html');
+                    postTemplatePath = path.join(templatesPath, 'postEdit.html');
                     return [4 /*yield*/, fs.readFile(postTemplatePath, 'utf8')];
                 case 1:
                     postTemplateRaw = _a.sent();
