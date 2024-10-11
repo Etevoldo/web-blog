@@ -42,10 +42,8 @@ http.createServer((req, res) => {
   else if (method === 'GET'
            && url === '/admin'
            && req.headers['authorization']) {
-    // get authorization credendial (second word of authorization value)
     const credentials = req.headers['authorization'].split(' ')[1];
-    // YWxhZGRpbjpvcGVuc2VzYW1l is aladdin:opensesame, just for testing
-    if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
+    if (credentials !== 'YWxhZGRpbjpvcGVuc2VzYW1l') {
       res.writeHead(401);
       res.end('access denied!\nWrong credentials!');
       return;
@@ -60,7 +58,7 @@ http.createServer((req, res) => {
     // get authorization credendial (second word of authorization value)
     const credentials = req.headers['authorization'].split(' ')[1];
     // YWxhZGRpbjpvcGVuc2VzYW1l is aladdin:opensesame, just for testing
-    if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
+    if (credentials !== 'YWxhZGRpbjpvcGVuc2VzYW1l') {
       res.writeHead(401);
       res.end('access denied!\nWrong credentials!');
       return;
@@ -79,7 +77,7 @@ http.createServer((req, res) => {
     // get authorization credendial (second word of authorization value)
     const credentials = req.headers['authorization'].split(' ')[1];
     // YWxhZGRpbjpvcGVuc2VzYW1l is aladdin:opensesame, just for testing
-    if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
+    if (credentials !== 'YWxhZGRpbjpvcGVuc2VzYW1l') {
       res.writeHead(401);
       res.end('access denied!\nWrong credentials!');
       return;
@@ -107,7 +105,7 @@ http.createServer((req, res) => {
            && url.split('/')[1] === 'edit'
            && req.headers['authorization']) {
     const credentials = req.headers['authorization'].split(' ')[1];
-    if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
+    if (credentials !== 'YWxhZGRpbjpvcGVuc2VzYW1l') {
       res.writeHead(401);
       res.end('access denied!\nWrong credentials!');
     }
@@ -127,7 +125,7 @@ http.createServer((req, res) => {
            && url.split('/')[1] === 'edit'
            && req.headers['authorization']) {
     const credentials = req.headers['authorization'].split(' ')[1];
-    if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
+    if (credentials !== 'YWxhZGRpbjpvcGVuc2VzYW1l') {
       res.writeHead(401);
       res.end('access denied!\nWrong credentials!');
     }
@@ -148,7 +146,7 @@ http.createServer((req, res) => {
            && url.split('/')[1] === 'new'
            && req.headers['authorization']) {
     const credentials = req.headers['authorization'].split(' ')[1];
-    if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
+    if (credentials !== 'YWxhZGRpbjpvcGVuc2VzYW1l') {
       res.writeHead(401);
       res.end('access denied!\nWrong credentials!');
     }
@@ -168,7 +166,6 @@ http.createServer((req, res) => {
           res.end(result)
         })
     });
-
   }
   else {
     const headers = {
@@ -181,13 +178,16 @@ http.createServer((req, res) => {
     req.on('end', () => {
       res.writeHead(200, headers);
       // debug info
-      res.end(`you sent something else: ${url}
-      Method: ${method}\nbody: ${body}`);
+      res.end(`
+      You've sent something else: ${url}
+      Method: ${method}\nbody: ${body}
+      `);
     });
   }
 
 }).listen(8080);
 
+console.log(`Server running at http://localhost:8080`);
 
 async function postsList(isAdmin=false) {
   let templatePath;
@@ -215,8 +215,6 @@ async function postsList(isAdmin=false) {
     return `<h1>some error ${err}</h1>`;
   }
 }
-
-console.log(`Server running at http://localhost:8080`);
 
 async function postFormat(postID) {
   try {
