@@ -29,9 +29,9 @@ function verify(token, secret) {
   const signature = HMAC_SHA256.digest('base64url');
 
   if (ClaimedSignature === signature) {
-    return decode(token, secret);
+    return { ok: true, data: decode(token, secret) } ;
   } else {
-    throw 'Error: token signature invalid!'
+    return { ok: false, data: {} };
   }
 }
 
