@@ -161,11 +161,11 @@ http.createServer((req, res) => {
       newPost(body)
         .then(result => {
           res.writeHead(201, {'Content-Type':'text/plain'});
-          res.end(result)
+          res.end(result);
         })
         .catch(err => {
           res.writeHead(500, {'Content-Type':'text/plain'});
-          res.end(result)
+          res.end(err);
         })
     });
 
