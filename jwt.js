@@ -7,7 +7,11 @@ function btoaUrl(stringToEncode) {
   return Buffer.from(stringToEncode).toString('base64url');
 }
 
-function sign(header, payload, secret) {
+const header = JSON.stringify({
+  alg: 'HS256',
+  typ: 'JWT'
+});
+function sign(payload, secret) {
   const HMAC_SHA256 = createHmac('sha256', secret);
 
   HMAC_SHA256.update(`${btoaUrl(header)}.${btoaUrl(payload)}`);
@@ -38,10 +42,6 @@ function decode(token, secret) {
 }
 
 //mock token
-const header = JSON.stringify({
-  alg: 'HS256',
-  typ: 'JWT'
-});
 const payload = JSON.stringify({
   loggedInAs: 'admin',
   iat: Math.floor(Date.now() / 1000),

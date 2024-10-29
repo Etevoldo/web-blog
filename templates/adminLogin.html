@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html land="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MyBlog - new post</title>
+  <link rel="stylesheet" type="text/css" href="../home.css"/>
+</head>
+<body>
+  <header>
+    <a href="../admin">&lt-- Go back home</a>
+  </header>
+  <form>
+    <input type="text" id="login" name="login"></input><br>
+    <input type="password" id="password" name="password"></input>
+    <input type="submit" id="submit" value="post"></input>
+  </form>
+  <script>
+    const btnSubmit = document.getElementById('submit');
+    const url = window.location.href;
+    console.log(document.cookie);
+    btnSubmit.addEventListener('click', (event) => {
+      event.preventDefault();
+
+      const obj = {
+        login: document.getElementById('login').value,
+        password: document.getElementById('password').value
+      };
+
+      console.log(obj); // debug
+      const editHeaders = new Headers();
+      editHeaders.append('Content-Type', 'application/json');
+      // append credentials header later (!)
+
+      const options = {
+        method: 'POST',
+        body: JSON.stringify(obj),
+        headers: editHeaders
+      }
+      fetch(url, options)
+        .then(res  => res.text())
+        .then(data => showSucess(data))
+        .catch(err => console.log(err));
+    });
+    function showSucess(data) {
+      alert(data);
+      window.location.reload();
+    }
+  </script>
+<body>
+</html>

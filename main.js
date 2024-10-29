@@ -6,6 +6,8 @@ const fs = require('node:fs/promises');
 const { createWriteStream, createReadStream } = require('node:fs');
 const Handlebars = require('handlebars');
 const { marked } = require('marked');
+const { sign, verify } = require('./jwt.js');
+const { secret } = require('./secret.js');
 
 http.createServer((req, res) => {
   const { method, url } = req;
@@ -13,7 +15,7 @@ http.createServer((req, res) => {
   if (method === 'GET' && url === '/') {
     const headers = {
       'Content-Type':'text/html'
-    }
+    };
     res.writeHead(200, headers);
     postsList()
       .then((data) => res.end(data));
@@ -22,7 +24,7 @@ http.createServer((req, res) => {
     const postID = url.split('/')[2];
     const headers = {
       'Content-Type':'text/html'
-    }
+    };
 
     postFormat(postID)
       .then((data) => {
@@ -67,7 +69,7 @@ http.createServer((req, res) => {
     }
     const headers = {
       'Content-Type':'text/html'
-    }
+    };
 
     res.writeHead(200, headers);
     editFormat(url.split('/')[2])
@@ -86,22 +88,27 @@ http.createServer((req, res) => {
     }
     const headers = {
       'Content-Type':'text/html'
-    }
+    };
     const newPostPath = path.join(__dirname, '/templates/postNew.html');
     const newPostDocument = createReadStream(newPostPath);
     res.writeHead(200, headers);
 
-    newPostDocument.pipe(res)
+    newPostDocument.pipe(res);
     newPostDocument.on('end', () => {
       res.end();
     });
   }
   else if (method === 'GET' && url === '/admin') {
-    const headers = {
-      'WWW-Authenticate': 'Basic'
-    }
-    res.writeHead(401, headers);
-    res.end('Admin only');
+    redirectLogin(res);
+  } // Authenticate data
+  else if (method === 'POST' && url === '/admin') {
+    let body = ''; // get body data
+    req.on('data', chunk => {
+      body += chunk;
+    });
+    req.on('end', () => {
+      createSession(body, res);
+    });
   } // Update post
   else if (method === 'PUT'
            && url.split('/')[1] === 'edit'
@@ -166,14 +173,14 @@ http.createServer((req, res) => {
         .catch(err => {
           res.writeHead(500, {'Content-Type':'text/plain'});
           res.end(err);
-        })
+        });
     });
 
   }
   else {
     const headers = {
       'Content-Type':'text/plain'
-    }
+    };
     let body = '';
     req.on('data', chunk => {
       body += chunk;
@@ -203,7 +210,7 @@ async function postsList(isAdmin=false) {
 
     let REALData = { posts : [ ] };
     for (const postFileName of posts) {
-      const postFilePath = path.join(__dirname, './postsData' , postFileName)
+      const postFilePath = path.join(__dirname, './postsData' , postFileName);
       const postContent = await fs.readFile(postFilePath , 'utf8' );
       REALData.posts.push(JSON.parse(postContent));
     }
@@ -266,4 +273,37 @@ async function newPost(body) {
   newPostObj.id = postsQuantity;
   await fs.writeFile(postFilePath, JSON.stringify(newPostObj));
   return `New post written on ${postFilePath}`;
+}
+
+function redirectLogin(res) {
+  const headers = { 'WWW-Authenticate': 'Bearer' };
+  const loginStream = createReadStream('./templates/adminLogin.html');
+  loginStream.pipe(res);
+  res.on('end', () => {
+    res.writeHead(200, headers);
+    res.end();
+  });
+}
+
+function createSession(data, res) {
+  const credendials = JSON.parse(data);
+  if (credendials.login !== 'aladdin' && credendials.password !== 'opensesame') {
+    res.writeHead(401);
+    res.end(`Wrong login!`);
+    return;
+  }
+  const oneMinute = 60;
+  const expiration = Math.floor(Date.now() / 1000) + (oneMinute);
+  const payload = JSON.stringify({
+    loggedInAs: 'admin',
+    iat: Math.floor(Date.now() / 1000),
+    exp: expiration,
+  });
+
+  const token = sign(payload, secret);
+  const headers = {
+    'Set-Cookie': `adminBlog=${token}; Max-Age=${oneMinute}`
+  };
+  res.writeHead(200, headers);
+  res.end(`Login sucessfull!`);
 }
