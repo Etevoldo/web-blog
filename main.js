@@ -44,29 +44,15 @@ http.createServer((req, res) => {
   else if (method === 'GET'
            && url === '/admin'
            && req.headers['cookie']) {
-    const token = req.headers['cookie'].split('=')[1];
-    try {
-      const claims = verify(token, secret);
-      console.log(claims);
-      res.writeHead(200);
-      postsList(true)
-        .then((data) => res.end(data));
-    } catch(err) {
-      console.error(err);
-      redirectLogin(res, 401);
-    }
+    verifySession(req, res);
+    res.writeHead(200);
+    postsList(true)
+      .then((data) => res.end(data));
   } // update post page
   else if (method === 'GET'
            && url.split('/')[1] === 'edit'
-           && req.headers['authorization']) {
-    // get authorization credendial (second word of authorization value)
-    const credentials = req.headers['authorization'].split(' ')[1];
-    // YWxhZGRpbjpvcGVuc2VzYW1l is aladdin:opensesame, just for testing
-    if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
-      res.writeHead(401);
-      res.end('access denied!\nWrong credentials!');
-      return;
-    }
+           && req.headers['cookie']) {
+    verifySession(req, res);
     const headers = {
       'Content-Type':'text/html'
     };
@@ -77,15 +63,8 @@ http.createServer((req, res) => {
   } // new post page, slight variation of update post page
   else if (method === 'GET'
            && url.split('/')[1] === 'new'
-           && req.headers['authorization']) {
-    // get authorization credendial (second word of authorization value)
-    const credentials = req.headers['authorization'].split(' ')[1];
-    // YWxhZGRpbjpvcGVuc2VzYW1l is aladdin:opensesame, just for testing
-    if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
-      res.writeHead(401);
-      res.end('access denied!\nWrong credentials!');
-      return;
-    }
+           && req.headers['cookie']) {
+    verifySession(req, res);
     const headers = {
       'Content-Type':'text/html'
     };
@@ -112,12 +91,8 @@ http.createServer((req, res) => {
   } // Update post
   else if (method === 'PUT'
            && url.split('/')[1] === 'edit'
-           && req.headers['authorization']) {
-    const credentials = req.headers['authorization'].split(' ')[1];
-    if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
-      res.writeHead(401);
-      res.end('access denied!\nWrong credentials!');
-    }
+           && req.headers['cookie']) {
+    verifySession(req, res);
     const headers = {'Content-Type':'text/plain'};
     res.writeHead(200, headers);
 
@@ -132,12 +107,8 @@ http.createServer((req, res) => {
   }
   else if (method === 'DELETE'
            && url.split('/')[1] === 'edit'
-           && req.headers['authorization']) {
-    const credentials = req.headers['authorization'].split(' ')[1];
-    if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
-      res.writeHead(401);
-      res.end('access denied!\nWrong credentials!');
-    }
+           && req.headers['cookie']) {
+    verifySession(req, res);
     const headers = {'Content-Type':'text/plain'};
     res.writeHead(200, headers);
 
@@ -153,12 +124,8 @@ http.createServer((req, res) => {
   }
   else if (method === 'POST'
            && url.split('/')[1] === 'new'
-           && req.headers['authorization']) {
-    const credentials = req.headers['authorization'].split(' ')[1];
-    if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
-      res.writeHead(401);
-      res.end('access denied!\nWrong credentials!');
-    }
+           && req.headers['cookie']) {
+    verifySession(req, res);
 
     let body = ''; // get body data
     req.on('data', chunk => {
@@ -306,4 +273,14 @@ function createSession(data, res) {
   };
   res.writeHead(200, headers);
   res.end(`Login sucessfull!`);
+}
+
+function verifySession(req, res) {
+    const token = req.headers['cookie'].split('=')[1];
+    const claims = verify(token, secret);
+    console.log(claims);
+    if (!claims.ok) {
+      console.error(`Incorrect credentials!`);
+      redirectLogin(res, 401);
+    }
 }
