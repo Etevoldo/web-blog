@@ -43,18 +43,18 @@ http.createServer((req, res) => {
   }
   else if (method === 'GET'
            && url === '/admin'
-           && req.headers['authorization']) {
-    // get authorization credendial (second word of authorization value)
-    const credentials = req.headers['authorization'].split(' ')[1];
-    // YWxhZGRpbjpvcGVuc2VzYW1l is aladdin:opensesame, just for testing
-    if (!(credentials === 'YWxhZGRpbjpvcGVuc2VzYW1l')) {
-      res.writeHead(401);
-      res.end('access denied!\nWrong credentials!');
-      return;
+           && req.headers['cookie']) {
+    const token = req.headers['cookie'].split('=')[1];
+    try {
+      const claims = verify(token, secret);
+      console.log(claims);
+      res.writeHead(200);
+      postsList(true)
+        .then((data) => res.end(data));
+    } catch(err) {
+      console.error(err);
+      redirectLogin(res, 401);
     }
-    res.writeHead(200);
-    postsList(true)
-      .then((data) => res.end(data));
   } // update post page
   else if (method === 'GET'
            && url.split('/')[1] === 'edit'
@@ -99,7 +99,7 @@ http.createServer((req, res) => {
     });
   }
   else if (method === 'GET' && url === '/admin') {
-    redirectLogin(res);
+    redirectLogin(res, 200);
   } // Authenticate data
   else if (method === 'POST' && url === '/admin') {
     let body = ''; // get body data
@@ -275,19 +275,19 @@ async function newPost(body) {
   return `New post written on ${postFilePath}`;
 }
 
-function redirectLogin(res) {
+function redirectLogin(res, code) {
   const headers = { 'WWW-Authenticate': 'Bearer' };
   const loginStream = createReadStream('./templates/adminLogin.html');
   loginStream.pipe(res);
   res.on('end', () => {
-    res.writeHead(200, headers);
+    res.writeHead(code, headers);
     res.end();
   });
 }
 
 function createSession(data, res) {
   const credendials = JSON.parse(data);
-  if (credendials.login !== 'aladdin' && credendials.password !== 'opensesame') {
+  if (credendials.login !== 'aladdin' || credendials.password !== 'opensesame') {
     res.writeHead(401);
     res.end(`Wrong login!`);
     return;
